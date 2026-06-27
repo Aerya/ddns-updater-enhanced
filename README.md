@@ -1,4 +1,4 @@
-# DDNS Updater v3 — Interactive WebUI
+# DDNS-Updater Enhanced
 
 A lightweight, universal Dynamic DNS updater for 50+ DNS providers, with a fully interactive web UI for managing your DDNS entries directly in the browser.
 
@@ -108,13 +108,13 @@ Pick a provider from the dropdown — the form fields appropriate for that provi
 ```sh
 mkdir -p data && echo '{"settings":[]}' > data/config.json
 docker run -d \
-  --name ddns-updater \
+  --name ddns-updater-enhanced \
   -p 8000:8000/tcp \
   -v "$(pwd)/data:/updater/data" \
-  ghcr.io/reptil1990/ddns-updater:latest
+  ghcr.io/aerya/ddns-updater-enhanced:latest
 ```
 
-> **Note:** A Docker image for this fork is built on every push to `master`. Until then, you can build the image locally with `docker build -t ddns-updater .` from the repo root.
+> **Note:** Une image Docker est buildée automatiquement à chaque push sur `main` et publiée sur `ghcr.io/aerya/ddns-updater-enhanced`.
 
 ---
 
