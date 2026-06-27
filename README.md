@@ -2,8 +2,6 @@
 
 A lightweight, universal Dynamic DNS updater for 50+ DNS providers, with a fully interactive web UI for managing your DDNS entries directly in the browser.
 
-[![License](https://img.shields.io/github/license/Aerya/ddns-updater)](LICENSE)
-
 ## Upstream sources
 
 This repository is a private fork that tracks two upstream projects and merges their changes automatically via pull requests:

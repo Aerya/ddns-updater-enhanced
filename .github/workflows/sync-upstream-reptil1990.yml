@@ -35,7 +35,7 @@ jobs:
             --exclude='README.md' \
             /tmp/upstream-reptil1990/ ./
 
-      - name: Patch Dockerfile labels to keep Aerya branding
+      - name: Patch docker-compose and Dockerfile to keep Aerya branding
         run: |
           sed -i \
             -e 's|org.opencontainers.image.authors="quentin.mcgaw@gmail.com"|org.opencontainers.image.authors="Aerya"|g' \
@@ -44,6 +44,8 @@ jobs:
             -e 's|org.opencontainers.image.source="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.source="https://github.com/Aerya/ddns-updater"|g' \
             -e 's|org.opencontainers.image.description="Universal DNS updater with WebUI"|org.opencontainers.image.description="Universal DNS updater with WebUI — based on qdm12/ddns-updater and reptil1990/ddns-updater"|g' \
             Dockerfile
+          sed -i 's|image: ghcr.io/qdm12/ddns-updater|image: ghcr.io/aerya/ddns-updater|g' docker-compose.yml
+          sed -i 's|image: ghcr.io/reptil1990/ddns-updater|image: ghcr.io/aerya/ddns-updater|g' docker-compose.yml
 
       - name: Check for changes
         id: check
