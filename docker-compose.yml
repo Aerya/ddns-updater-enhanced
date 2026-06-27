@@ -1,8 +1,8 @@
 version: "3.7"
 services:
-  ddns-updater:
-    image: ghcr.io/aerya/ddns-updater
-    container_name: ddns-updater
+  ddns-updater-enhanced:
+    image: ghcr.io/aerya/ddns-updater-enhanced
+    container_name: ddns-updater-enhanced
     network_mode: bridge
     ports:
       - 8000:8000/tcp

@@ -99,7 +99,7 @@ ENV \
     LOG_LEVEL=info \
     LOG_CALLER=hidden \
     SHOUTRRR_ADDRESSES= \
-    SHOUTRRR_DEFAULT_TITLE="DDNS Updater" \
+    SHOUTRRR_DEFAULT_TITLE="DDNS-Updater Enhanced" \
     TZ= \
     # UMASK left empty so it dynamically defaults to the OS current umask
     UMASK= \
@@ -114,9 +114,9 @@ LABEL \
     org.opencontainers.image.version=$VERSION \
     org.opencontainers.image.created=$CREATED \
     org.opencontainers.image.revision=$COMMIT \
-    org.opencontainers.image.url="https://github.com/Aerya/ddns-updater" \
-    org.opencontainers.image.documentation="https://github.com/Aerya/ddns-updater" \
-    org.opencontainers.image.source="https://github.com/Aerya/ddns-updater" \
-    org.opencontainers.image.title="ddns-updater" \
-    org.opencontainers.image.description="Universal DNS updater with WebUI — based on qdm12/ddns-updater and reptil1990/ddns-updater"
+    org.opencontainers.image.url="https://github.com/Aerya/ddns-updater-enhanced" \
+    org.opencontainers.image.documentation="https://github.com/Aerya/ddns-updater-enhanced" \
+    org.opencontainers.image.source="https://github.com/Aerya/ddns-updater-enhanced" \
+    org.opencontainers.image.title="ddns-updater-enhanced" \
+    org.opencontainers.image.description="DDNS-Updater Enhanced — based on qdm12/ddns-updater and reptil1990/ddns-updater"
 COPY --from=build --chown=${UID}:${GID} /tmp/gobuild/app /updater/ddns-updater

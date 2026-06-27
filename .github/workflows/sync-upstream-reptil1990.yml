@@ -39,13 +39,19 @@ jobs:
         run: |
           sed -i \
             -e 's|org.opencontainers.image.authors="quentin.mcgaw@gmail.com"|org.opencontainers.image.authors="Aerya"|g' \
-            -e 's|org.opencontainers.image.url="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.url="https://github.com/Aerya/ddns-updater"|g' \
-            -e 's|org.opencontainers.image.documentation="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.documentation="https://github.com/Aerya/ddns-updater"|g' \
-            -e 's|org.opencontainers.image.source="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.source="https://github.com/Aerya/ddns-updater"|g' \
-            -e 's|org.opencontainers.image.description="Universal DNS updater with WebUI"|org.opencontainers.image.description="Universal DNS updater with WebUI — based on qdm12/ddns-updater and reptil1990/ddns-updater"|g' \
+            -e 's|org.opencontainers.image.url="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.url="https://github.com/Aerya/ddns-updater-enhanced"|g' \
+            -e 's|org.opencontainers.image.documentation="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.documentation="https://github.com/Aerya/ddns-updater-enhanced"|g' \
+            -e 's|org.opencontainers.image.source="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.source="https://github.com/Aerya/ddns-updater-enhanced"|g' \
+            -e 's|org.opencontainers.image.title="ddns-updater"|org.opencontainers.image.title="ddns-updater-enhanced"|g' \
+            -e 's|org.opencontainers.image.description="Universal DNS updater with WebUI"|org.opencontainers.image.description="DDNS-Updater Enhanced — based on qdm12/ddns-updater and reptil1990/ddns-updater"|g' \
+            -e 's|SHOUTRRR_DEFAULT_TITLE="DDNS Updater"|SHOUTRRR_DEFAULT_TITLE="DDNS-Updater Enhanced"|g' \
             Dockerfile
-          sed -i 's|image: ghcr.io/qdm12/ddns-updater|image: ghcr.io/aerya/ddns-updater|g' docker-compose.yml
-          sed -i 's|image: ghcr.io/reptil1990/ddns-updater|image: ghcr.io/aerya/ddns-updater|g' docker-compose.yml
+          sed -i \
+            -e 's|image: ghcr.io/qdm12/ddns-updater|image: ghcr.io/aerya/ddns-updater-enhanced|g' \
+            -e 's|image: ghcr.io/reptil1990/ddns-updater|image: ghcr.io/aerya/ddns-updater-enhanced|g' \
+            -e 's|image: ghcr.io/aerya/ddns-updater$|image: ghcr.io/aerya/ddns-updater-enhanced|g' \
+            -e 's|container_name: ddns-updater$|container_name: ddns-updater-enhanced|g' \
+            docker-compose.yml
 
       - name: Check for changes
         id: check
