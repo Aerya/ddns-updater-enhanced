@@ -35,6 +35,16 @@ jobs:
             --exclude='README.md' \
             /tmp/upstream-qdm12/ ./
 
+      - name: Patch Dockerfile labels to keep Aerya branding
+        run: |
+          sed -i \
+            -e 's|org.opencontainers.image.authors="quentin.mcgaw@gmail.com"|org.opencontainers.image.authors="Aerya"|g' \
+            -e 's|org.opencontainers.image.url="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.url="https://github.com/Aerya/ddns-updater"|g' \
+            -e 's|org.opencontainers.image.documentation="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.documentation="https://github.com/Aerya/ddns-updater"|g' \
+            -e 's|org.opencontainers.image.source="https://github.com/qdm12/ddns-updater"|org.opencontainers.image.source="https://github.com/Aerya/ddns-updater"|g' \
+            -e 's|org.opencontainers.image.description="Universal DNS updater with WebUI"|org.opencontainers.image.description="Universal DNS updater with WebUI — based on qdm12/ddns-updater and reptil1990/ddns-updater"|g' \
+            Dockerfile
+
       - name: Check for changes
         id: check
         run: |
