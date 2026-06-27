@@ -82,7 +82,7 @@ jobs:
           This PR will be merged automatically once all checks pass." \
             --base main \
             --head "$BRANCH"
-          gh pr merge --auto --squash "$BRANCH" 2>/dev/null || true
+          gh pr merge --squash --delete-branch --subject "chore: sync from qdm12/ddns-updater $(date +%Y-%m-%d)" "$BRANCH" || true
 
       - name: No changes detected
         if: steps.check.outputs.changed == 'false'
