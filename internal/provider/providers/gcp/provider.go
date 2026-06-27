@@ -2,17 +2,14 @@ package gcp
 
 import (
 	"encoding/json"
-	stderrors "errors"
 	"fmt"
 	"net/netip"
-	"strings"
 
 	"github.com/qdm12/ddns-updater/internal/models"
 	"github.com/qdm12/ddns-updater/internal/provider/constants"
 	"github.com/qdm12/ddns-updater/internal/provider/errors"
 	"github.com/qdm12/ddns-updater/internal/provider/utils"
 	"github.com/qdm12/ddns-updater/pkg/publicip/ipversion"
-	"golang.org/x/oauth2/google"
 )
 
 type Provider struct {
@@ -23,7 +20,6 @@ type Provider struct {
 	project     string
 	zone        string
 	credentials json.RawMessage
-	credType    google.CredentialsType
 }
 
 func New(data json.RawMessage, domain, owner string,
@@ -41,7 +37,7 @@ func New(data json.RawMessage, domain, owner string,
 		return nil, fmt.Errorf("JSON decoding extra settings: %w", err)
 	}
 
-	credType, err := validateSettings(domain, extraSettings.Project, extraSettings.Zone, extraSettings.Credentials)
+	err = validateSettings(domain, extraSettings.Project, extraSettings.Zone, extraSettings.Credentials)
 	if err != nil {
 		return nil, fmt.Errorf("validating provider specific settings: %w", err)
 	}
@@ -54,60 +50,33 @@ func New(data json.RawMessage, domain, owner string,
 		project:     extraSettings.Project,
 		zone:        extraSettings.Zone,
 		credentials: extraSettings.Credentials,
-		credType:    credType,
 	}, nil
 }
 
-func validateSettings(domain, project, zone string, credentials json.RawMessage) (
-	googleCredType google.CredentialsType, err error,
-) {
+func validateSettings(domain, project, zone string, credentials json.RawMessage) (err error) {
 	err = utils.CheckDomain(domain)
 	if err != nil {
-		return "", fmt.Errorf("%w: %w", errors.ErrDomainNotValid, err)
+		return fmt.Errorf("%w: %w", errors.ErrDomainNotValid, err)
 	}
 
 	switch {
 	case project == "":
-		return "", fmt.Errorf("%w", errors.ErrGCPProjectNotSet)
+		return fmt.Errorf("%w", errors.ErrGCPProjectNotSet)
 	case zone == "":
-		return "", fmt.Errorf("%w", errors.ErrZoneIdentifierNotSet)
+		return fmt.Errorf("%w", errors.ErrZoneIdentifierNotSet)
 	case len(credentials) == 0:
-		return "", fmt.Errorf("%w", errors.ErrCredentialsNotSet)
+		return fmt.Errorf("%w", errors.ErrCredentialsNotSet)
 	}
 	var creds struct {
 		Type string `json:"type"`
 	}
 	err = json.Unmarshal(credentials, &creds)
-	switch {
-	case err != nil:
-		return "", fmt.Errorf("%w: json malformed: %w", errors.ErrCredentialsNotValid, err)
-	case creds.Type == "":
-		return "", fmt.Errorf("%w: missing 'type' field in credentials JSON", errors.ErrCredentialsNotValid)
+	if err != nil || creds.Type == "" {
+		return fmt.Errorf("%w: 'type' JSON field value missing",
+			errors.ErrCredentialsNotValid)
 	}
-	googleCredType, err = parseCredentialsType(creds.Type)
-	if err != nil {
-		return "", fmt.Errorf("parsing credentials type: %w", err)
-	}
-	return googleCredType, nil
-}
 
-var errCredentialsTypeNotValid = stderrors.New("credentials type not valid")
-
-func parseCredentialsType(s string) (credentialsType google.CredentialsType, err error) {
-	available := [...]google.CredentialsType{
-		google.ServiceAccount,
-		google.AuthorizedUser,
-		google.ExternalAccount,
-		google.ExternalAccountAuthorizedUser,
-		google.ImpersonatedServiceAccount,
-		google.GDCHServiceAccount,
-	}
-	for _, credType := range available {
-		if strings.EqualFold(s, string(credType)) {
-			return credType, nil
-		}
-	}
-	return "", fmt.Errorf("%w: %q", errCredentialsTypeNotValid, s)
+	return nil
 }
 
 func (p *Provider) String() string {

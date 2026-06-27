@@ -30,10 +30,6 @@ func SetXFilter(request *http.Request, value string) {
 	request.Header.Set("X-Filter", value)
 }
 
-func SetXAuthToken(request *http.Request, value string) {
-	request.Header.Set("X-Auth-Token", value)
-}
-
 func SetXAuthUsername(request *http.Request, value string) {
 	request.Header.Set("X-Auth-Username", value)
 }
@@ -44,8 +40,4 @@ func SetXAuthPassword(request *http.Request, value string) {
 
 func SetXAPIKey(request *http.Request, value string) {
 	request.Header.Set("X-Api-Key", value)
-}
-
-func SetXAPISecret(request *http.Request, value string) {
-	request.Header.Set("X-Api-Secret", value)
 }
