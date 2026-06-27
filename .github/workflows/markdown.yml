@@ -1,0 +1,50 @@
+name: Markdown
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "**.md"
+      - .github/workflows/markdown.yml
+  pull_request:
+    paths:
+      - "**.md"
+      - .github/workflows/markdown.yml
+
+jobs:
+  markdown:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DavidAnson/markdownlint-cli2-action@v18
+        with:
+          globs: |
+            **.md
+            !docs/superpowers/**
+          config: .markdownlint.json
+
+      - uses: reviewdog/action-misspell@v1
+        with:
+          locale: "US"
+          level: error
+          pattern: |
+            *.md
+
+      - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: yes
+          config-file: .github/workflows/configs/mlc-config.json
+
+      - uses: peter-evans/dockerhub-description@v5
+        if: github.repository == 'qdm12/ddns-updater' && github.event_name == 'push'
+        with:
+          username: qmcgaw
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: qmcgaw/ddns-updater
+          short-description: Container to update DNS records periodically with WebUI for many DNS providers
+          readme-filepath: README.md
+          enable-url-completion: true
