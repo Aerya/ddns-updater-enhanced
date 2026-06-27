@@ -9,7 +9,7 @@ This repository is a private fork that tracks two upstream projects and merges t
 | Project | Role |
 |---------|------|
 | [qdm12/ddns-updater](https://github.com/qdm12/ddns-updater) | Original project — DDNS update engine, DNS provider support, CLI and core logic |
-| [reptil1990/ddns-updater](https://github.com/reptil1990/ddns-updater) | Fork adding the interactive WebUI (v3) — dashboard, config editor, hot-reload |
+| [reptil1990/ddns-updater](https://github.com/reptil1990/ddns-updater) | Source d'inspiration pour l'interface WebUI v3 — dashboard, config editor, hot-reload |
 
 Changes from both upstreams are automatically proposed as pull requests (see `.github/workflows/sync-*.yml`) and merged when CI passes.
 
