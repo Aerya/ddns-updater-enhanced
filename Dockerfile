@@ -1,9 +1,9 @@
 ARG BUILDPLATFORM=linux/amd64
-ARG ALPINE_VERSION=3.22
-ARG GO_VERSION=1.25
+ARG ALPINE_VERSION=3.23
+ARG GO_VERSION=1.26
 ARG XCPUTRANSLATE_VERSION=v0.9.0
-ARG GOLANGCI_LINT_VERSION=v2.4.0
-ARG MOCKGEN_VERSION=v1.6.0
+ARG GOLANGCI_LINT_VERSION=v2.11.4
+ARG MOCKGEN_VERSION=v0.6.0
 
 FROM --platform=${BUILDPLATFORM} ghcr.io/qdm12/xcputranslate:${XCPUTRANSLATE_VERSION} AS xcputranslate
 FROM --platform=${BUILDPLATFORM} ghcr.io/qdm12/binpot:golangci-lint-${GOLANGCI_LINT_VERSION} AS golangci-lint
@@ -110,13 +110,13 @@ ARG VERSION=unknown
 ARG CREATED="an unknown date"
 ARG COMMIT=unknown
 LABEL \
-    org.opencontainers.image.authors="Aerya" \
+    org.opencontainers.image.authors="quentin.mcgaw@gmail.com" \
     org.opencontainers.image.version=$VERSION \
     org.opencontainers.image.created=$CREATED \
     org.opencontainers.image.revision=$COMMIT \
-    org.opencontainers.image.url="https://github.com/Aerya/ddns-updater" \
-    org.opencontainers.image.documentation="https://github.com/Aerya/ddns-updater" \
-    org.opencontainers.image.source="https://github.com/Aerya/ddns-updater" \
+    org.opencontainers.image.url="https://github.com/qdm12/ddns-updater" \
+    org.opencontainers.image.documentation="https://github.com/qdm12/ddns-updater" \
+    org.opencontainers.image.source="https://github.com/qdm12/ddns-updater" \
     org.opencontainers.image.title="ddns-updater" \
-    org.opencontainers.image.description="Universal DNS updater with WebUI — based on qdm12/ddns-updater and reptil1990/ddns-updater"
+    org.opencontainers.image.description="Universal DNS updater with WebUI"
 COPY --from=build --chown=${UID}:${GID} /tmp/gobuild/app /updater/ddns-updater
