@@ -1,0 +1,75 @@
+name: Sync upstream reptil1990/ddns-updater
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+      - name: Add reptil1990 remote and fetch
+        run: |
+          git remote add reptil1990 https://github.com/reptil1990/ddns-updater.git
+          git fetch reptil1990
+
+      - name: Check for new commits
+        id: check
+        run: |
+          AHEAD=$(git rev-list HEAD..reptil1990/main --count 2>/dev/null || echo 0)
+          echo "ahead=$AHEAD" >> "$GITHUB_OUTPUT"
+
+      - name: Create sync branch and merge
+        if: steps.check.outputs.ahead != '0'
+        id: merge
+        run: |
+          BRANCH="sync/reptil1990-$(date +%Y%m%d-%H%M)"
+          git checkout -b "$BRANCH"
+          if git merge reptil1990/main --no-edit -m "chore: sync from reptil1990/ddns-updater $(date +%Y-%m-%d)"; then
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+            echo "conflict=false" >> "$GITHUB_OUTPUT"
+          else
+            git merge --abort
+            echo "conflict=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push branch
+        if: steps.check.outputs.ahead != '0' && steps.merge.outputs.conflict == 'false'
+        run: git push origin "${{ steps.merge.outputs.branch }}"
+
+      - name: Create PR and enable auto-merge
+        if: steps.check.outputs.ahead != '0' && steps.merge.outputs.conflict == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ steps.merge.outputs.branch }}"
+          PR_URL=$(gh pr create \
+            --title "chore: sync from reptil1990/ddns-updater $(date +%Y-%m-%d)" \
+            --body "Automatic sync from upstream [reptil1990/ddns-updater](https://github.com/reptil1990/ddns-updater).
+
+          This PR was generated automatically by the \`sync-upstream-reptil1990\` workflow.
+          It will be merged automatically once all checks pass." \
+            --base main \
+            --head "$BRANCH" 2>&1) || true
+          echo "PR: $PR_URL"
+          gh pr merge --auto --squash "$BRANCH" 2>/dev/null || true
+
+      - name: Report merge conflict
+        if: steps.check.outputs.ahead != '0' && steps.merge.outputs.conflict == 'true'
+        run: |
+          echo "::warning::Merge conflict detected while syncing from reptil1990/ddns-updater. Manual intervention required."

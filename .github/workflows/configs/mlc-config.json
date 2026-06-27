@@ -1,0 +1,50 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^https://api6.ipify.org$"
+    },
+    {
+      "pattern": "^http://ip1.dynupdate6.no-ip.com$"
+    },
+    {
+      "pattern": "^https://ap.www.namecheap.com/Domains/DomainControlPanel/example.com/advancedns$"
+    },
+    {
+      "pattern": "^https://www.godaddy.com"
+    },
+    {
+      "pattern": "^https://www.namecheap.com"
+    },
+    {
+      "pattern": "https://www.linode.com/docs/products/tools/api/guides/manage-api-tokens/"
+    },
+    {
+      "pattern": "https://(ip|ipv|v)6.+"
+    },
+    {
+      "pattern": "https://github.com/qdm12/ddns-updater/pkgs/container/ddns-updater"
+    },
+    {
+      "pattern": "^https://www.duckdns.org/$"
+    },
+    {
+      "pattern": "^https://my.vultr.com/settings/#settingsapi$"
+    },
+    {
+      "pattern": "^https://www.namesilo.com"
+    },
+    {
+      "pattern": "^https://cp.servercow.de"
+    }
+  ],
+  "timeout": "20s",
+  "retryOn429": false,
+  "fallbackRetryDelay": "30s",
+  "aliveStatusCodes": [
+    200,
+    206
+  ]
+}

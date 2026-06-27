@@ -1,0 +1,12 @@
+.devcontainer
+.git
+.github
+.vscode
+docs
+readme
+!readme/*.go
+.gitignore
+config.json
+docker-compose.yml
+LICENSE
+ui/favicon.svg
