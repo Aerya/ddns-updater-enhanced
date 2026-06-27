@@ -23,53 +23,67 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
 
-      - name: Add reptil1990 remote and fetch
+      - name: Clone reptil1990 upstream into temp dir
         run: |
-          git remote add reptil1990 https://github.com/reptil1990/ddns-updater.git
-          git fetch reptil1990
+          git clone --depth=1 https://github.com/reptil1990/ddns-updater.git /tmp/upstream-reptil1990
 
-      - name: Check for new commits
+      - name: Sync files from upstream (excluding our own overrides)
+        run: |
+          rsync -av --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='README.md' \
+            /tmp/upstream-reptil1990/ ./
+
+      - name: Check for changes
         id: check
         run: |
-          AHEAD=$(git rev-list HEAD..reptil1990/main --count 2>/dev/null || echo 0)
-          echo "ahead=$AHEAD" >> "$GITHUB_OUTPUT"
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Create sync branch and merge
-        if: steps.check.outputs.ahead != '0'
-        id: merge
+      - name: Get upstream commit info
+        if: steps.check.outputs.changed == 'true'
+        id: upstream
+        run: |
+          SHA=$(git -C /tmp/upstream-reptil1990 rev-parse --short HEAD)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Create sync branch and commit
+        if: steps.check.outputs.changed == 'true'
+        id: branch
         run: |
           BRANCH="sync/reptil1990-$(date +%Y%m%d-%H%M)"
           git checkout -b "$BRANCH"
-          if git merge reptil1990/main --no-edit -m "chore: sync from reptil1990/ddns-updater $(date +%Y-%m-%d)"; then
-            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
-            echo "conflict=false" >> "$GITHUB_OUTPUT"
-          else
-            git merge --abort
-            echo "conflict=true" >> "$GITHUB_OUTPUT"
-          fi
+          git add -A
+          git commit -m "chore: sync from reptil1990/ddns-updater@${{ steps.upstream.outputs.sha }} ($(date +%Y-%m-%d))"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Push branch
-        if: steps.check.outputs.ahead != '0' && steps.merge.outputs.conflict == 'false'
-        run: git push origin "${{ steps.merge.outputs.branch }}"
+        if: steps.check.outputs.changed == 'true'
+        run: git push origin "${{ steps.branch.outputs.branch }}"
 
       - name: Create PR and enable auto-merge
-        if: steps.check.outputs.ahead != '0' && steps.merge.outputs.conflict == 'false'
+        if: steps.check.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="${{ steps.merge.outputs.branch }}"
-          PR_URL=$(gh pr create \
+          BRANCH="${{ steps.branch.outputs.branch }}"
+          gh pr create \
             --title "chore: sync from reptil1990/ddns-updater $(date +%Y-%m-%d)" \
-            --body "Automatic sync from upstream [reptil1990/ddns-updater](https://github.com/reptil1990/ddns-updater).
+            --body "Automatic file sync from upstream [reptil1990/ddns-updater](https://github.com/reptil1990/ddns-updater) at commit \`${{ steps.upstream.outputs.sha }}\`.
 
-          This PR was generated automatically by the \`sync-upstream-reptil1990\` workflow.
-          It will be merged automatically once all checks pass." \
+          Files excluded from sync (local overrides kept):
+          - \`.github/\` (our own workflows)
+          - \`README.md\` (our own documentation)
+
+          This PR will be merged automatically once all checks pass." \
             --base main \
-            --head "$BRANCH" 2>&1) || true
-          echo "PR: $PR_URL"
+            --head "$BRANCH"
           gh pr merge --auto --squash "$BRANCH" 2>/dev/null || true
 
-      - name: Report merge conflict
-        if: steps.check.outputs.ahead != '0' && steps.merge.outputs.conflict == 'true'
-        run: |
-          echo "::warning::Merge conflict detected while syncing from reptil1990/ddns-updater. Manual intervention required."
+      - name: No changes detected
+        if: steps.check.outputs.changed == 'false'
+        run: echo "No changes from reptil1990/ddns-updater. Nothing to do."
