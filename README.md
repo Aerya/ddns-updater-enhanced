@@ -35,7 +35,11 @@ The original update logic from upstream is **unchanged**. Only the management su
 
 | Dashboard | Configuration |
 | --- | --- |
-| Modernized table view of all records with status dots, status timestamps, and the original column layout. | List of all configured entries with edit/delete actions and an "Add Entry" modal. |
+| ![Dashboard](readme/ddns-updater-enhanced1.png) | ![Configuration](readme/ddns-updater-enhanced2.png) |
+
+| Edit Entry | Add Entry |
+| --- | --- |
+| ![Edit Entry](readme/ddns-updater-enhanced3.png) | ![Add Entry](readme/ddns-updater-enhanced4.png) |
 
 ### REST API
 
