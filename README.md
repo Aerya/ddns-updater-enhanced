@@ -40,11 +40,6 @@ The original update logic from upstream is **unchanged**. Only the management su
 | Edit Entry | Add Entry |
 | --- | --- |
 | ![Edit Entry](readme/ddns-updater-enhanced3.png) | ![Add Entry](readme/ddns-updater-enhanced4.png) |
-
-| Add Entry — Cloudflare |
-| --- |
-| ![Add Entry Cloudflare](readme/ddns-updater-enhanced5.png) |
-
 ### REST API
 
 Everything the WebUI does is also available as a clean REST API on the same port:
