@@ -110,13 +110,13 @@ ARG VERSION=unknown
 ARG CREATED="an unknown date"
 ARG COMMIT=unknown
 LABEL \
-    org.opencontainers.image.authors="Aerya" \
+    org.opencontainers.image.authors="quentin.mcgaw@gmail.com" \
     org.opencontainers.image.version=$VERSION \
     org.opencontainers.image.created=$CREATED \
     org.opencontainers.image.revision=$COMMIT \
-    org.opencontainers.image.url="https://github.com/Aerya/ddns-updater" \
-    org.opencontainers.image.documentation="https://github.com/Aerya/ddns-updater" \
-    org.opencontainers.image.source="https://github.com/Aerya/ddns-updater" \
+    org.opencontainers.image.url="https://github.com/qdm12/ddns-updater" \
+    org.opencontainers.image.documentation="https://github.com/qdm12/ddns-updater" \
+    org.opencontainers.image.source="https://github.com/qdm12/ddns-updater" \
     org.opencontainers.image.title="ddns-updater" \
-    org.opencontainers.image.description="Universal DNS updater with WebUI — based on qdm12/ddns-updater and reptil1990/ddns-updater"
+    org.opencontainers.image.description="Universal DNS updater with WebUI"
 COPY --from=build --chown=${UID}:${GID} /tmp/gobuild/app /updater/ddns-updater
