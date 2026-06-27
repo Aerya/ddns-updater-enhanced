@@ -27,8 +27,7 @@ type handlers struct {
 var uiFS embed.FS
 
 func newHandler(ctx context.Context, rootURL string,
-	db Database, runner UpdateForcer, configPath string,
-	parseConfig ConfigParser,
+	db Database, runner UpdateForcer,
 ) http.Handler {
 	indexTemplate := template.Must(template.ParseFS(uiFS, "ui/index.html"))
 
@@ -41,11 +40,10 @@ func newHandler(ctx context.Context, rootURL string,
 		ctx:           ctx,
 		db:            db,
 		indexTemplate: indexTemplate,
-		timeNow:       time.Now,
-		runner:        runner,
+		// TODO build information
+		timeNow: time.Now,
+		runner:  runner,
 	}
-
-	api := newAPIHandlers(configPath, db, parseConfig)
 
 	router := chi.NewRouter()
 
@@ -57,15 +55,8 @@ func newHandler(ctx context.Context, rootURL string,
 		router.Handle(rootURL, http.RedirectHandler(rootURL+"/", http.StatusPermanentRedirect))
 	}
 	router.Get(rootURL+"/", handlers.index)
-	router.Get(rootURL+"/update", handlers.update)
 
-	// API routes
-	router.Get(rootURL+"/api/status", api.getStatus)
-	router.Get(rootURL+"/api/config", api.getConfig)
-	router.Post(rootURL+"/api/config", api.postConfig)
-	router.Put(rootURL+"/api/config/{index}", api.putConfig)
-	router.Delete(rootURL+"/api/config/{index}", api.deleteConfig)
-	router.Get(rootURL+"/api/providers", api.getProviders)
+	router.Get(rootURL+"/update", handlers.update)
 
 	router.Handle(rootURL+"/static/*", http.StripPrefix(rootURL+"/static/", http.FileServerFS(staticFolder)))
 
