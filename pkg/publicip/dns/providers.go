@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/netip"
-	"slices"
 
 	"github.com/miekg/dns"
 )
@@ -26,8 +25,10 @@ func ListProviders() []Provider {
 var ErrUnknownProvider = errors.New("unknown public IP echo DNS provider")
 
 func ValidateProvider(provider Provider) error {
-	if slices.Contains(ListProviders(), provider) {
-		return nil
+	for _, possible := range ListProviders() {
+		if provider == possible {
+			return nil
+		}
 	}
 	return fmt.Errorf("%w: %s", ErrUnknownProvider, provider)
 }

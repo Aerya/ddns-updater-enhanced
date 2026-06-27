@@ -64,14 +64,14 @@ func (p *ipinfo) get(ctx context.Context, ip netip.Addr) (
 
 	result.IP = data.IP
 	if data.Region != "" {
-		result.Region = new(data.Region)
+		result.Region = stringPtr(data.Region)
 	}
 	if data.City != "" {
-		result.City = new(data.City)
+		result.City = stringPtr(data.City)
 	}
 	if data.Country != "" {
 		country := countryCodeToName(data.Country)
-		result.Country = new(country)
+		result.Country = stringPtr(country)
 	}
 
 	return result, nil

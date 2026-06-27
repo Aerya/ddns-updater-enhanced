@@ -9,3 +9,5 @@ type Result struct {
 	City    *string
 	Source  string
 }
+
+func stringPtr(s string) *string { return &s }

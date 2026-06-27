@@ -110,7 +110,6 @@ func (p *Provider) HTML() models.HTMLRow {
 	}
 }
 
-// Update updates the IP address for the provider.
 // Unfortunately api description only available in swedish
 // https://support.loopia.se/wiki/om-dyndns-stodet/
 // Bit of explanation for curl scripting in english is available at

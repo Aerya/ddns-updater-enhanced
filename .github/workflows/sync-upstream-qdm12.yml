@@ -33,6 +33,7 @@ jobs:
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='README.md' \
+            --exclude='internal/server/' \
             /tmp/upstream-qdm12/ ./
 
       - name: Patch docker-compose and Dockerfile to keep Aerya branding

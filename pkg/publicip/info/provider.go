@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/netip"
-	"slices"
 )
 
 type Provider string
@@ -26,8 +25,10 @@ func ListProviders() []Provider {
 var ErrUnknownProvider = errors.New("unknown public IP information provider")
 
 func ValidateProvider(provider Provider) error {
-	if slices.Contains(ListProviders(), provider) {
-		return nil
+	for _, possible := range ListProviders() {
+		if provider == possible {
+			return nil
+		}
 	}
 	return fmt.Errorf("%w: %s", ErrUnknownProvider, provider)
 }

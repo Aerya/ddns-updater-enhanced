@@ -96,7 +96,6 @@ func (p *Provider) HTML() models.HTMLRow {
 	}
 }
 
-// Update updates the IP address for the provider.
 // See https://developer.hosting.ionos.com/docs/dns
 func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Addr) (
 	newIP netip.Addr, err error,

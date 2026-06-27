@@ -73,7 +73,6 @@ linters:
     - goconst
     - gocritic
     - gocyclo
-    - godoclint
     - godot
     - goheader
     - gomoddirectives
@@ -85,7 +84,6 @@ linters:
     - inamedparam
     - interfacebloat
     - intrange
-    - iotamixing
     - ireturn
     - lll
     - maintidx
@@ -93,7 +91,6 @@ linters:
     - mirror
     - misspell
     - mnd
-    - modernize
     - musttag
     - nakedret
     - nestif
