@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -74,7 +75,7 @@ func TestGetConfig(t *testing.T) {
 	const content = `{"settings":[{"provider":"duckdns","domain":"test.duckdns.org","token":"secret123"}]}`
 	_, api := setupTestConfig(t, content)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/config", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/config", nil)
 	w := httptest.NewRecorder()
 	api.getConfig(w, req)
 
@@ -108,7 +109,8 @@ func TestPostConfig(t *testing.T) {
 	configPath, api := setupTestConfig(t, `{"settings":[]}`)
 
 	body := `{"provider":"duckdns","domain":"new.duckdns.org","token":"abc123"}`
-	req := httptest.NewRequest(http.MethodPost, "/api/config", bytes.NewBufferString(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost,
+		"/api/config", bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
 	api.postConfig(w, req)
 
@@ -132,7 +134,8 @@ func TestPutConfig(t *testing.T) {
 	router.Put("/api/config/{index}", api.putConfig)
 
 	body := `{"provider":"duckdns","domain":"updated.duckdns.org","token":"***"}`
-	req := httptest.NewRequest(http.MethodPut, "/api/config/0", bytes.NewBufferString(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPut,
+		"/api/config/0", bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -158,7 +161,7 @@ func TestDeleteConfig(t *testing.T) {
 	router := chi.NewRouter()
 	router.Delete("/api/config/{index}", api.deleteConfig)
 
-	req := httptest.NewRequest(http.MethodDelete, "/api/config/0", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodDelete, "/api/config/0", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -184,7 +187,7 @@ func TestDeleteConfigOutOfRange(t *testing.T) {
 	router := chi.NewRouter()
 	router.Delete("/api/config/{index}", api.deleteConfig)
 
-	req := httptest.NewRequest(http.MethodDelete, "/api/config/5", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodDelete, "/api/config/5", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -198,7 +201,8 @@ func TestPostConfigMissingProvider(t *testing.T) {
 	_, api := setupTestConfig(t, `{"settings":[]}`)
 
 	body := `{"domain":"test.com"}`
-	req := httptest.NewRequest(http.MethodPost, "/api/config", bytes.NewBufferString(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost,
+		"/api/config", bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
 	api.postConfig(w, req)
 
@@ -209,17 +213,21 @@ func TestPostConfigMissingProvider(t *testing.T) {
 
 func TestMaskSensitive(t *testing.T) {
 	t.Parallel()
-	entry := map[string]any{
-		"provider": "cloudflare",
-		"domain":   "example.com",
-		"token":    "my-secret-token",
-		"ttl":      float64(1),
+	entry := map[string]any{ //nolint:gosec // Test fixture verifies that credentials are masked.
+		"provider":   "spaceship",
+		"domain":     "example.com",
+		"token":      "my-secret-token",
+		"api_secret": "my-secret-api-secret",
+		"ttl":        float64(1),
 	}
 	masked := maskSensitive(entry)
 	if masked["token"] != maskedToken {
 		t.Fatalf("expected token masked, got %v", masked["token"])
 	}
-	if masked["provider"] != "cloudflare" {
+	if masked["api_secret"] != maskedToken {
+		t.Fatalf("expected api_secret masked, got %v", masked["api_secret"])
+	}
+	if masked["provider"] != "spaceship" {
 		t.Fatalf("expected provider unchanged, got %v", masked["provider"])
 	}
 	if masked["domain"] != "example.com" {
@@ -231,7 +239,7 @@ func TestGetProviders(t *testing.T) {
 	t.Parallel()
 	api := newAPIHandlers("", nil, nil)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/providers", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/providers", nil)
 	w := httptest.NewRecorder()
 	api.getProviders(w, req)
 
@@ -282,7 +290,8 @@ func TestPostConfigTriggersReload(t *testing.T) {
 	api := newAPIHandlers(configPath, db, parser)
 
 	body := `{"provider":"duckdns","domain":"test.duckdns.org","token":"abc"}`
-	req := httptest.NewRequest(http.MethodPost, "/api/config", bytes.NewBufferString(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost,
+		"/api/config", bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
 	api.postConfig(w, req)
 
