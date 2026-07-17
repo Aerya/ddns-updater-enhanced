@@ -7,7 +7,7 @@ A lightweight, universal Dynamic DNS updater for 50+ DNS providers, with a fully
 This repository is a private fork that tracks two upstream projects and merges their changes automatically via pull requests:
 
 | Project | Role |
-|---------|------|
+| --- | --- |
 | [qdm12/ddns-updater](https://github.com/qdm12/ddns-updater) | Original project — DDNS update engine, DNS provider support, CLI and core logic |
 | [reptil1990/ddns-updater](https://github.com/reptil1990/ddns-updater) | Inspiration for the WebUI v3 — dashboard, config editor, hot-reload |
 
@@ -40,6 +40,7 @@ The original update logic from upstream is **unchanged**. Only the management su
 | Edit Entry | Add Entry |
 | --- | --- |
 | ![Edit Entry](readme/ddns-updater-enhanced3.png) | ![Add Entry](readme/ddns-updater-enhanced4.png) |
+
 ### REST API
 
 Everything the WebUI does is also available as a clean REST API on the same port:
@@ -53,7 +54,7 @@ Everything the WebUI does is also available as a clean REST API on the same port
 | `DELETE` | `/api/config/{index}` | Delete an entry by array index |
 | `GET` | `/api/providers` | Provider field definitions used by the WebUI form generator |
 
-Sensitive fields (`password`, `token`, `key`, `secret`, `api_key`, `secret_api_key`, `access_key_id`, `access_secret`, `consumer_key`, `app_key`, `app_secret`, `client_key`, `user_service_key`, `credentials`, `personal_access_token`, `apikey`, `customer_number`) are returned as `"***"` in `GET` responses. On `PUT`, sending `""` or `"***"` for a sensitive field preserves the existing value.
+Sensitive fields (`password`, `token`, `key`, `secret`, `api_key`, `api_secret`, `secret_api_key`, `access_key`, `secret_key`, `access_key_id`, `access_secret`, `consumer_key`, `app_key`, `app_secret`, `client_key`, `user_service_key`, `credentials`, `personal_access_token`, `apikey`, `customer_number`) are returned as `"***"` in `GET` responses. On `PUT`, sending `""` or `"***"` for a sensitive field preserves the existing value.
 
 ---
 
