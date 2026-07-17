@@ -34,7 +34,13 @@ jobs:
             --exclude='.github/' \
             --exclude='README.md' \
             --exclude='readme/' \
+            --exclude='cmd/ddns-updater/main.go' \
+            --exclude='internal/data/memory.go' \
+            --exclude='internal/data/memory_test.go' \
+            --exclude='internal/params/webui.go' \
             --exclude='internal/server/' \
+            --exclude='internal/provider/fielddefs.go' \
+            --exclude='internal/provider/fielddefs_test.go' \
             /tmp/upstream-qdm12/ ./
 
       - name: Patch docker-compose and Dockerfile to keep Aerya branding
@@ -97,6 +103,8 @@ jobs:
           Files excluded from sync (local overrides kept):
           - \`.github/\` (our own workflows)
           - \`README.md\` (our own documentation)
+          - \`readme/\` (our own screenshots)
+          - \`cmd/ddns-updater/main.go\`, \`internal/data/memory.go\`, \`internal/data/memory_test.go\`, \`internal/params/webui.go\`, \`internal/server/\`, \`internal/provider/fielddefs.go\` and \`internal/provider/fielddefs_test.go\` (our WebUI layer)
 
           This PR will be merged automatically once all checks pass." \
             --base main \

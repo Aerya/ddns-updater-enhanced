@@ -30,6 +30,8 @@ jobs:
       - name: Sync WebUI files from upstream (internal/server/ only)
         run: |
           rsync -av --delete \
+            --exclude='api.go' \
+            --exclude='api_test.go' \
             /tmp/upstream-reptil1990/internal/server/ ./internal/server/
 
       - name: Check for changes
