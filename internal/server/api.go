@@ -33,6 +33,7 @@ var sensitiveFieldNames = map[string]bool{
 	"key":                   true,
 	"secret":                true,
 	"api_key":               true,
+	"api_secret":            true,
 	"secret_api_key":        true,
 	"access_key":            true,
 	"secret_key":            true,

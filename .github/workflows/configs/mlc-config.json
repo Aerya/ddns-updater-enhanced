@@ -38,6 +38,9 @@
     },
     {
       "pattern": "^https://cp.servercow.de"
+    },
+    {
+      "pattern": "^https://www.spaceship.com/application/api-manager/$"
     }
   ],
   "timeout": "20s",
