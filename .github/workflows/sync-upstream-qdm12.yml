@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SYNC_PR_TOKEN }}
 
       - name: Configure git
         run: |
@@ -34,6 +34,8 @@ jobs:
             --exclude='.github/' \
             --exclude='README.md' \
             --exclude='readme/' \
+            --exclude='go.mod' \
+            --exclude='go.sum' \
             --exclude='cmd/ddns-updater/main.go' \
             --exclude='internal/data/memory.go' \
             --exclude='internal/data/memory_test.go' \
@@ -80,36 +82,40 @@ jobs:
         if: steps.check.outputs.changed == 'true'
         id: branch
         run: |
-          BRANCH="sync/qdm12-$(date +%Y%m%d-%H%M)"
+          BRANCH="sync/qdm12"
           git checkout -b "$BRANCH"
           git add -A
           git commit -m "chore: sync from qdm12/ddns-updater@${{ steps.upstream.outputs.sha }} ($(date +%Y-%m-%d))"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
-      - name: Push branch
+      - name: Push or refresh persistent branch
         if: steps.check.outputs.changed == 'true'
-        run: git push origin "${{ steps.branch.outputs.branch }}"
+        run: git push --force origin "HEAD:${{ steps.branch.outputs.branch }}"
 
-      - name: Create PR and enable auto-merge
+      - name: Create or refresh PR and enable auto-merge
         if: steps.check.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SYNC_PR_TOKEN }}
         run: |
           BRANCH="${{ steps.branch.outputs.branch }}"
-          gh pr create \
-            --title "chore: sync from qdm12/ddns-updater $(date +%Y-%m-%d)" \
-            --body "Automatic file sync from upstream [qdm12/ddns-updater](https://github.com/qdm12/ddns-updater) at commit \`${{ steps.upstream.outputs.sha }}\`.
+          TITLE="Synchroniser avec qdm12/ddns-updater ($(date +%Y-%m-%d))"
+          BODY="Synchronisation automatique des fichiers depuis [qdm12/ddns-updater](https://github.com/qdm12/ddns-updater), commit \`${{ steps.upstream.outputs.sha }}\`.
 
-          Files excluded from sync (local overrides kept):
-          - \`.github/\` (our own workflows)
-          - \`README.md\` (our own documentation)
-          - \`readme/\` (our own screenshots)
-          - \`cmd/ddns-updater/main.go\`, \`internal/data/memory.go\`, \`internal/data/memory_test.go\`, \`internal/params/webui.go\`, \`internal/server/\`, \`internal/provider/fielddefs.go\` and \`internal/provider/fielddefs_test.go\` (our WebUI layer)
+          Fichiers exclus de la synchronisation afin de conserver les adaptations locales :
+          - \`.github/\` (workflows du dépôt)
+          - \`README.md\` et \`readme/\` (documentation et captures locales)
+          - \`go.mod\` et \`go.sum\` (dépendances gérées par Dependabot)
+          - \`cmd/ddns-updater/main.go\`, \`internal/data/memory.go\`, \`internal/data/memory_test.go\`, \`internal/params/webui.go\`, \`internal/server/\`, \`internal/provider/fielddefs.go\` et \`internal/provider/fielddefs_test.go\` (couche WebUI locale)
 
-          This PR will be merged automatically once all checks pass." \
-            --base main \
-            --head "$BRANCH"
-          gh pr merge --auto --squash --delete-branch --subject "chore: sync from qdm12/ddns-updater $(date +%Y-%m-%d)" "$BRANCH"
+          Cette PR sera fusionnée automatiquement après validation de tous les contrôles."
+          PR_NUMBER=$(gh pr list --state open --head "$BRANCH" --json number --jq '.[0].number // empty')
+          if [ -z "$PR_NUMBER" ]; then
+            PR_URL=$(gh pr create --title "$TITLE" --body "$BODY" --base main --head "$BRANCH")
+            PR_NUMBER="${PR_URL##*/}"
+          else
+            gh pr edit "$PR_NUMBER" --title "$TITLE" --body "$BODY"
+          fi
+          gh pr merge --auto --squash --subject "$TITLE" "$PR_NUMBER"
 
       - name: No changes detected
         if: steps.check.outputs.changed == 'false'
