@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SYNC_PR_TOKEN }}
 
       - name: Configure git
         run: |
@@ -32,6 +32,7 @@ jobs:
           rsync -av --delete \
             --exclude='api.go' \
             --exclude='api_test.go' \
+            --exclude='handler.go' \
             /tmp/upstream-reptil1990/internal/server/ ./internal/server/
 
       - name: Check for changes
@@ -54,34 +55,38 @@ jobs:
         if: steps.check.outputs.changed == 'true'
         id: branch
         run: |
-          BRANCH="sync/reptil1990-$(date +%Y%m%d-%H%M)"
+          BRANCH="sync/reptil1990"
           git checkout -b "$BRANCH"
           git add -A
           git commit -m "chore: sync from reptil1990/ddns-updater@${{ steps.upstream.outputs.sha }} ($(date +%Y-%m-%d))"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
-      - name: Push branch
+      - name: Push or refresh persistent branch
         if: steps.check.outputs.changed == 'true'
-        run: git push origin "${{ steps.branch.outputs.branch }}"
+        run: git push --force origin "HEAD:${{ steps.branch.outputs.branch }}"
 
-      - name: Create PR and enable auto-merge
+      - name: Create or refresh PR and enable auto-merge
         if: steps.check.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SYNC_PR_TOKEN }}
         run: |
           BRANCH="${{ steps.branch.outputs.branch }}"
-          gh pr create \
-            --title "chore: sync from reptil1990/ddns-updater $(date +%Y-%m-%d)" \
-            --body "Automatic file sync from upstream [reptil1990/ddns-updater](https://github.com/reptil1990/ddns-updater) at commit \`${{ steps.upstream.outputs.sha }}\`.
+          TITLE="Synchroniser avec reptil1990/ddns-updater ($(date +%Y-%m-%d))"
+          BODY="Synchronisation automatique de la WebUI depuis [reptil1990/ddns-updater](https://github.com/reptil1990/ddns-updater), commit \`${{ steps.upstream.outputs.sha }}\`.
 
-          Files excluded from sync (local overrides kept):
-          - \`.github/\` (our own workflows)
-          - \`README.md\` (our own documentation)
+          Fichiers exclus de la synchronisation afin de conserver les adaptations locales :
+          - \`internal/server/api.go\` et \`internal/server/api_test.go\` (API locale)
+          - \`internal/server/handler.go\` (configuration locale sécurisée sans \`middleware.RealIP\`)
 
-          This PR will be merged automatically once all checks pass." \
-            --base main \
-            --head "$BRANCH"
-          gh pr merge --auto --squash --delete-branch --subject "chore: sync from reptil1990/ddns-updater $(date +%Y-%m-%d)" "$BRANCH"
+          Cette PR sera fusionnée automatiquement après validation de tous les contrôles."
+          PR_NUMBER=$(gh pr list --state open --head "$BRANCH" --json number --jq '.[0].number // empty')
+          if [ -z "$PR_NUMBER" ]; then
+            PR_URL=$(gh pr create --title "$TITLE" --body "$BODY" --base main --head "$BRANCH")
+            PR_NUMBER="${PR_URL##*/}"
+          else
+            gh pr edit "$PR_NUMBER" --title "$TITLE" --body "$BODY"
+          fi
+          gh pr merge --auto --squash --subject "$TITLE" "$PR_NUMBER"
 
       - name: No changes detected
         if: steps.check.outputs.changed == 'false'
