@@ -1,36 +1,86 @@
 version: 2
 updates:
-  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    labels:
+      - "dependencies"
+      - "go"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:05"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    labels:
+      - "dependencies"
+      - "docker"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:10"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    labels:
+      - "dependencies"
+      - "docker"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "07:30"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    labels:
+      - "dependencies"
+      - "github-actions"
     groups:
-      github-actions-minor-patch:
-        patterns:
-          - "*"
+      minor-and-patch:
         update-types:
           - "minor"
           - "patch"
-  - package-ecosystem: docker
-    directory: /
-    schedule:
-      interval: "weekly"
-    groups:
-      docker-minor-patch:
-        patterns:
-          - "*"
+    ignore:
+      - dependency-name: "*"
         update-types:
-          - "minor"
-          - "patch"
-  - package-ecosystem: gomod
-    directory: /
-    schedule:
-      interval: "weekly"
-    groups:
-      go-modules-minor-patch:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
+          - "version-update:semver-major"
