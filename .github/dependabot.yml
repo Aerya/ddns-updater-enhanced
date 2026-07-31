@@ -9,30 +9,6 @@ updates:
       timezone: "Europe/Paris"
     open-pull-requests-limit: 10
     rebase-strategy: "auto"
-    labels:
-      - "dependencies"
-      - "go"
-    groups:
-      minor-and-patch:
-        update-types:
-          - "minor"
-          - "patch"
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - "version-update:semver-major"
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:05"
-      timezone: "Europe/Paris"
-    open-pull-requests-limit: 10
-    rebase-strategy: "auto"
-    labels:
-      - "dependencies"
-      - "docker"
     groups:
       minor-and-patch:
         update-types:
@@ -47,13 +23,28 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+      time: "06:05"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
       time: "06:10"
       timezone: "Europe/Paris"
     open-pull-requests-limit: 10
     rebase-strategy: "auto"
-    labels:
-      - "dependencies"
-      - "docker"
     groups:
       minor-and-patch:
         update-types:
@@ -72,9 +63,6 @@ updates:
       timezone: "Europe/Paris"
     open-pull-requests-limit: 10
     rebase-strategy: "auto"
-    labels:
-      - "dependencies"
-      - "github-actions"
     groups:
       minor-and-patch:
         update-types:
