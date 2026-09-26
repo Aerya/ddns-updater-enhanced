@@ -57,6 +57,7 @@ func (p *Provider) getRecord(ctx context.Context, client *http.Client,
 			Name string `json:"name"`
 			Type string `json:"type"`
 			Data string `json:"data"`
+			TTL  uint32 `json:"ttl"`
 		} `json:"records"`
 		Meta struct {
 			Total uint32 `json:"total"`
@@ -92,6 +93,9 @@ func (p *Provider) getRecord(ctx context.Context, client *http.Client,
 		recordIP, err = netip.ParseAddr(record.Data)
 		if err != nil {
 			return "", netip.Addr{}, fmt.Errorf("parsing existing IP: %w", err)
+		}
+		if record.TTL != 0 {
+			p.knownTTL.Store(record.TTL)
 		}
 		return record.ID, recordIP, nil
 	}

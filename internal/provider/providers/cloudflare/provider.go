@@ -313,6 +313,11 @@ func (p *Provider) createRecord(ctx context.Context, client *http.Client, ip net
 	return parsedJSON.Result.ID, nil
 }
 
+// TTL returns the record TTL in seconds.
+func (p *Provider) TTL() (ttl *uint32) {
+	return &p.ttl
+}
+
 func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Addr) (newIP netip.Addr, err error) {
 	recordType := constants.A
 	if ip.Is6() {

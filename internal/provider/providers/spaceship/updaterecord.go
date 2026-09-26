@@ -9,6 +9,17 @@ import (
 	"github.com/qdm12/ddns-updater/internal/provider/constants"
 )
 
+// TTL returns the record TTL in seconds if it is known.
+func (p *Provider) TTL() (ttl *uint32) {
+	if p.ttl != 0 {
+		return &p.ttl
+	}
+	if knownTTL := p.knownTTL.Load(); knownTTL != 0 {
+		return &knownTTL
+	}
+	return nil
+}
+
 func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Addr) (newIP netip.Addr, err error) {
 	recordType := constants.A
 	if ip.Is6() {
@@ -32,6 +43,9 @@ func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Add
 	}
 
 	if found {
+		if existingRecord.TTL != 0 {
+			p.knownTTL.Store(existingRecord.TTL)
+		}
 		currentIP, err := netip.ParseAddr(existingRecord.Address)
 		if err != nil {
 			return netip.Addr{}, fmt.Errorf("parsing existing IP address: %w", err)
