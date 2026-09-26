@@ -117,6 +117,14 @@ func (p *Provider) HTML() models.HTMLRow {
 	}
 }
 
+// TTL returns the record TTL in seconds if it is known.
+func (p *Provider) TTL() (ttl *uint32) {
+	if p.ttl == 0 {
+		return nil
+	}
+	return &p.ttl
+}
+
 func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Addr) (newIP netip.Addr, err error) {
 	recordType := constants.A
 	if ip.Is6() {

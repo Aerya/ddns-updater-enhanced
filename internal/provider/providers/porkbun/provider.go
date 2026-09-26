@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/netip"
+	"strconv"
+	"sync/atomic"
 
 	"github.com/qdm12/ddns-updater/internal/models"
 	"github.com/qdm12/ddns-updater/internal/provider/constants"
@@ -22,6 +24,7 @@ type Provider struct {
 	ipVersion    ipversion.IPVersion
 	ipv6Suffix   netip.Prefix
 	ttl          uint32
+	knownTTL     atomic.Uint32
 	apiKey       string
 	secretAPIKey string
 }
@@ -114,6 +117,17 @@ func setHeaders(request *http.Request) {
 	headers.SetAccept(request, "application/json")
 }
 
+// TTL returns the record TTL in seconds if it is known.
+func (p *Provider) TTL() (ttl *uint32) {
+	if p.ttl != 0 {
+		return &p.ttl
+	}
+	if knownTTL := p.knownTTL.Load(); knownTTL != 0 {
+		return &knownTTL
+	}
+	return nil
+}
+
 // Update updates the IP address for the provider.
 // See https://porkbun.com/api/json/v3/documentation
 func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Addr) (newIP netip.Addr, err error) {
@@ -138,6 +152,12 @@ func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Add
 			return netip.Addr{}, fmt.Errorf("creating record: %w", err)
 		}
 		return ip, nil
+	}
+
+	const base = 10
+	ttlValue, err := strconv.ParseUint(records[0].TTL, base, 32)
+	if err == nil && ttlValue != 0 {
+		p.knownTTL.Store(uint32(ttlValue))
 	}
 
 	for _, record := range records {
