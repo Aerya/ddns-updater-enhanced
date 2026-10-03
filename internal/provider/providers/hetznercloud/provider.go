@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/netip"
+	"sync/atomic"
 
 	"github.com/qdm12/ddns-updater/internal/models"
 	"github.com/qdm12/ddns-updater/internal/provider/constants"
@@ -24,6 +25,8 @@ type Provider struct {
 	// It is optional, and is ONLY used to add a record to the rrset.
 	// See https://docs.hetzner.cloud/reference/cloud#tag/zone-rrset-actions/add_zone_rrset_records.body.ttl
 	ttl uint32
+	// knownTTL is the record TTL observed from API responses, used when ttl is unset.
+	knownTTL atomic.Uint32
 }
 
 func New(data json.RawMessage, domain, owner string,
@@ -110,6 +113,17 @@ func (p *Provider) HTML() models.HTMLRow {
 		Provider:  "<a href=\"https://www.hetzner.com/cloud/\">Hetzner Cloud</a>",
 		IPVersion: p.ipVersion.String(),
 	}
+}
+
+// TTL returns the record TTL in seconds if it is known.
+func (p *Provider) TTL() (ttl *uint32) {
+	if p.ttl != 0 {
+		return &p.ttl
+	}
+	if knownTTL := p.knownTTL.Load(); knownTTL != 0 {
+		return &knownTTL
+	}
+	return nil
 }
 
 // Update updates the DNS record with the given IP address.

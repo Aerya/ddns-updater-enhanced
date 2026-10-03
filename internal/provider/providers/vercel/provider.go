@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/netip"
 	"net/url"
+	"sync/atomic"
 
 	"github.com/qdm12/ddns-updater/internal/models"
 	"github.com/qdm12/ddns-updater/internal/provider/constants"
@@ -25,6 +26,7 @@ type Provider struct {
 	token      string
 	teamID     string
 	ttl        uint32
+	knownTTL   atomic.Uint32
 }
 
 func New(data json.RawMessage, domain, owner string,
@@ -104,6 +106,17 @@ func (p *Provider) HTML() models.HTMLRow {
 		Provider:  "<a href=\"https://vercel.com/\">Vercel</a>",
 		IPVersion: p.ipVersion.String(),
 	}
+}
+
+// TTL returns the record TTL in seconds if it is known.
+func (p *Provider) TTL() (ttl *uint32) {
+	if p.ttl != 0 {
+		return &p.ttl
+	}
+	if knownTTL := p.knownTTL.Load(); knownTTL != 0 {
+		return &knownTTL
+	}
+	return nil
 }
 
 func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Addr) (newIP netip.Addr, err error) {
