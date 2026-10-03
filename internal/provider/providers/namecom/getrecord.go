@@ -47,6 +47,7 @@ func (p *Provider) getRecordID(ctx context.Context, client *http.Client,
 			RecordID int    `json:"id"`
 			Host     string `json:"host"`
 			Type     string `json:"type"`
+			TTL      uint32 `json:"ttl"`
 		} `json:"records"`
 	}
 	err = decoder.Decode(&data)
@@ -59,6 +60,9 @@ func (p *Provider) getRecordID(ctx context.Context, client *http.Client,
 			record.Host = "@"
 		}
 		if record.Host == p.owner && record.Type == recordType {
+			if record.TTL != 0 {
+				p.knownTTL.Store(record.TTL)
+			}
 			return record.RecordID, nil
 		}
 	}

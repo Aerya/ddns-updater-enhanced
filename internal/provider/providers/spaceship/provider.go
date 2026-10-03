@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/netip"
 	"strings"
+	"sync/atomic"
 
 	"github.com/qdm12/ddns-updater/internal/models"
 	"github.com/qdm12/ddns-updater/internal/provider/constants"
@@ -23,6 +24,7 @@ type Provider struct {
 	apiKey     string
 	apiSecret  string
 	ttl        uint32
+	knownTTL   atomic.Uint32
 }
 
 func New(data json.RawMessage, domain, owner string,
