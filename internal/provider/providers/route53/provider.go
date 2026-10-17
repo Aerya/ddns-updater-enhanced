@@ -134,6 +134,11 @@ func (p *Provider) HTML() models.HTMLRow {
 	}
 }
 
+// TTL returns the record TTL in seconds.
+func (p *Provider) TTL() (ttl *uint32) {
+	return &p.ttl
+}
+
 // Update updates the IP address for the provider.
 // See https://docs.aws.amazon.com/Route53/latest/APIReference/API_ChangeResourceRecordSets.html
 func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Addr) (newIP netip.Addr, err error) {
