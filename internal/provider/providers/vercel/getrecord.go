@@ -65,6 +65,9 @@ func (p *Provider) getRecord(ctx context.Context, client *http.Client, recordTyp
 
 	for _, r := range result.Records {
 		if r.Name == targetName && strings.EqualFold(r.Type, recordType) {
+			if r.TTL != 0 {
+				p.knownTTL.Store(r.TTL)
+			}
 			return r.ID, r.Value, nil
 		}
 	}
