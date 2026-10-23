@@ -31,6 +31,31 @@ type Definition struct {
 //
 //nolint:gochecknoglobals // intentional package-level lookup table for the WebUI
 var Definitions = map[string]Definition{
+	"bunny": {
+		Name: "Bunny", URL: "https://bunny.net",
+		Fields: []Field{
+			{Name: "api_key", Label: "API Key", Type: "password", Required: true},
+			{Name: "ttl", Label: "TTL", Type: "number", Help: "60–3600 seconds; empty uses the zone default"},
+		},
+	},
+	"gigahostno": {
+		Name: "Gigahost.no", URL: "https://gigahost.no",
+		AuthGroups: []AuthGroup{
+			{Name: "API Key", Fields: []Field{{Name: "apikey", Label: "API Key", Type: "password", Required: true}}},
+			{Name: "Email and password", Fields: []Field{
+				{Name: "email", Label: "Email", Type: "text", Required: true},
+				{Name: "password", Label: "Password", Type: "password", Required: true, Help: "Use an API key if two-factor authentication is enabled"},
+			}},
+		},
+	},
+	"hostinger": {
+		Name: "Hostinger", URL: "https://www.hostinger.com",
+		Fields: []Field{
+			{Name: "token", Label: "API Token", Type: "password", Required: true},
+			{Name: "ttl", Label: "TTL", Type: "number", Placeholder: "14400"},
+		},
+	},
+
 	"aliyun": {
 		Name: "Aliyun",
 		URL:  "https://www.aliyun.com",
