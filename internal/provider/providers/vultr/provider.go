@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/netip"
+	"sync/atomic"
 
 	"github.com/qdm12/ddns-updater/internal/models"
 	"github.com/qdm12/ddns-updater/internal/provider/constants"
@@ -23,6 +24,7 @@ type Provider struct {
 	ipv6Suffix netip.Prefix
 	apiKey     string
 	ttl        uint32
+	knownTTL   atomic.Uint32
 }
 
 func New(data json.RawMessage, domain, owner string,
@@ -107,6 +109,17 @@ func (p *Provider) setHeaders(request *http.Request) {
 	headers.SetContentType(request, "application/json")
 	headers.SetAccept(request, "application/json")
 	headers.SetAuthBearer(request, p.apiKey)
+}
+
+// TTL returns the record TTL in seconds if it is known.
+func (p *Provider) TTL() (ttl *uint32) {
+	if p.ttl != 0 {
+		return &p.ttl
+	}
+	if knownTTL := p.knownTTL.Load(); knownTTL != 0 {
+		return &knownTTL
+	}
+	return nil
 }
 
 // Update does the following:

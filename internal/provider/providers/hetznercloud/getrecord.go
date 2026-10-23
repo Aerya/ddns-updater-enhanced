@@ -46,6 +46,7 @@ func (p *Provider) getRecord(ctx context.Context, client *http.Client, ip netip.
 	decoder := json.NewDecoder(response.Body)
 	var responseData struct {
 		RRSet struct {
+			TTL     uint32 `json:"ttl"`
 			Records []struct {
 				Value string `json:"value"`
 			} `json:"records"`
@@ -54,6 +55,9 @@ func (p *Provider) getRecord(ctx context.Context, client *http.Client, ip netip.
 	err = decoder.Decode(&responseData)
 	if err != nil {
 		return true, false, fmt.Errorf("json decoding response body: %w", err)
+	}
+	if responseData.RRSet.TTL != 0 {
+		p.knownTTL.Store(responseData.RRSet.TTL)
 	}
 
 	for _, record := range responseData.RRSet.Records {

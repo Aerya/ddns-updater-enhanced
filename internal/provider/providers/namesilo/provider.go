@@ -6,10 +6,12 @@ import (
 	stderrors "errors"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/netip"
 	"net/url"
 	"strconv"
+	"sync/atomic"
 
 	"github.com/qdm12/ddns-updater/internal/models"
 	"github.com/qdm12/ddns-updater/internal/provider/constants"
@@ -26,6 +28,7 @@ type Provider struct {
 	ipv6Suffix netip.Prefix
 	key        string
 	ttl        *uint32
+	knownTTL   atomic.Uint32
 }
 
 type apiResponse struct {
@@ -33,10 +36,11 @@ type apiResponse struct {
 		Code    json.Number `json:"code"`
 		Detail  string      `json:"detail"`
 		Records []struct {
-			ID    string `json:"record_id"`
-			Type  string `json:"type"`
-			Host  string `json:"host"`
-			Value string `json:"value"`
+			ID    string      `json:"record_id"`
+			Type  string      `json:"type"`
+			Host  string      `json:"host"`
+			Value string      `json:"value"`
+			TTL   json.Number `json:"ttl"` // The API inconsistently types the value.
 		} `json:"resource_record,omitempty"` // Field only available during list record
 	} `json:"reply"`
 }
@@ -127,6 +131,17 @@ func (p *Provider) HTML() models.HTMLRow {
 	}
 }
 
+// TTL returns the record TTL in seconds if it is set or known.
+func (p *Provider) TTL() (ttl *uint32) {
+	if p.ttl != nil {
+		return p.ttl
+	}
+	if knownTTL := p.knownTTL.Load(); knownTTL != 0 {
+		return &knownTTL
+	}
+	return nil
+}
+
 // Update does the following:
 // 1. if there's no record, create it.
 // 2. if it exists and ip is different, update it.
@@ -178,6 +193,10 @@ func (p *Provider) getRecord(ctx context.Context, client *http.Client, recordTyp
 		ip, err = netip.ParseAddr(record.Value)
 		if err != nil {
 			return nil, netip.Addr{}, fmt.Errorf("parsing existing IP: %w", err)
+		}
+		recordTTL, err := record.TTL.Int64()
+		if err == nil && recordTTL > 0 && recordTTL <= math.MaxUint32 {
+			p.knownTTL.Store(uint32(recordTTL))
 		}
 		return &record.ID, ip, nil
 	}
