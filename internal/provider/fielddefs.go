@@ -44,7 +44,10 @@ var Definitions = map[string]Definition{
 			{Name: "API Key", Fields: []Field{{Name: "apikey", Label: "API Key", Type: "password", Required: true}}},
 			{Name: "Email and password", Fields: []Field{
 				{Name: "email", Label: "Email", Type: "text", Required: true},
-				{Name: "password", Label: "Password", Type: "password", Required: true, Help: "Use an API key if two-factor authentication is enabled"},
+				{
+					Name: "password", Label: "Password", Type: "password", Required: true,
+					Help: "Use an API key if two-factor authentication is enabled",
+				},
 			}},
 		},
 	},
