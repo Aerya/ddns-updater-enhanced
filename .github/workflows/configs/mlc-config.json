@@ -41,6 +41,18 @@
     },
     {
       "pattern": "^https://www.spaceship.com/application/api-manager/$"
+    },
+    {
+      "pattern": "^https://developer\\.godaddy\\.com/keys/?$"
+    },
+    {
+      "pattern": "^https://dcc\\.godaddy\\.com/manage/"
+    },
+    {
+      "pattern": "^https://hpanel\\.hostinger\\.com/profile/api$"
+    },
+    {
+      "pattern": "^https://vercel\\.com/dashboard$"
     }
   ],
   "timeout": "20s",

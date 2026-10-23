@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/netip"
 	"net/url"
+	"sync/atomic"
 
 	"github.com/qdm12/ddns-updater/internal/models"
 	"github.com/qdm12/ddns-updater/internal/provider/constants"
@@ -25,6 +26,7 @@ type Provider struct {
 	ipv6Suffix netip.Prefix
 	secretKey  string
 	ttl        uint16
+	knownTTL   atomic.Uint32
 }
 
 func New(data json.RawMessage, domain, owner string,
@@ -103,6 +105,18 @@ func (p *Provider) HTML() models.HTMLRow {
 		Provider:  "<a href=\"https://www.scaleway.com/\">Scaleway</a>",
 		IPVersion: p.ipVersion.String(),
 	}
+}
+
+// TTL returns the record TTL in seconds if it is known.
+func (p *Provider) TTL() (ttl *uint32) {
+	if p.ttl != 0 {
+		ttlValue := uint32(p.ttl)
+		return &ttlValue
+	}
+	if knownTTL := p.knownTTL.Load(); knownTTL != 0 {
+		return &knownTTL
+	}
+	return nil
 }
 
 // Update updates the DNS record for the domain using the Scaleway API.
@@ -198,6 +212,9 @@ func (p *Provider) Update(ctx context.Context, client *http.Client, ip netip.Add
 	}
 	if len(data.Records) == 0 {
 		return netip.Addr{}, fmt.Errorf("%w: no record in response", errors.ErrUnknownResponse)
+	}
+	if data.Records[0].TTL != 0 {
+		p.knownTTL.Store(uint32(data.Records[0].TTL))
 	}
 	newIP, err = netip.ParseAddr(data.Records[0].Data)
 	if err != nil {

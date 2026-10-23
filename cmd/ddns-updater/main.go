@@ -361,7 +361,7 @@ func createHealthServer(db health.AllSelecter, resolver health.LookupIPer,
 	if serverAddress == "" {
 		return noop.New("healthcheck server"), nil
 	}
-	isHealthy := health.MakeIsHealthy(db, resolver)
+	isHealthy := health.MakeIsHealthy(db, resolver, time.Now)
 	healthLogger := logger.New(log.SetComponent("healthcheck server"))
 	return health.NewServer(serverAddress, healthLogger, isHealthy)
 }
