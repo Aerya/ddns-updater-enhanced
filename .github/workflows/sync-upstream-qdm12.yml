@@ -32,6 +32,7 @@ jobs:
           rsync -av --delete \
             --exclude='.git/' \
             --exclude='.github/' \
+            --exclude='.devcontainer/' \
             --exclude='README.md' \
             --exclude='readme/' \
             --exclude='go.mod' \
