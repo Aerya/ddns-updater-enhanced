@@ -1,4 +1,4 @@
-FROM ghcr.io/qdm12/godevcontainer:v0.22.0-alpine
+FROM ghcr.io/qdm12/godevcontainer:v0.23.0-alpine
 
 RUN addgroup -g 1000 developer && adduser -D -u 1000 -G developer -s /bin/zsh developer \
     && cp -a /root/. /home/developer/ \
